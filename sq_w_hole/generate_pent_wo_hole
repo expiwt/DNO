@@ -1,0 +1,213 @@
+#!/usr/bin/env python3
+"""
+generate_pentagons_fixed.py
+
+Исправленная версия: генерирует 30 пятиугольников с регуляризацией
+Добавлена сортировка вершин по углу от центроида
+"""
+
+import gmsh
+import numpy as np
+import os
+
+
+def regularize_vertices(vertices):
+    """
+    Переупорядочивает вершины по углу от центроида
+    Гарантирует невыпуклый, но ПРОСТОЙ (невамбулирующийся) многоугольник
+    """
+    center_x = np.mean([v[0] for v in vertices])
+    center_y = np.mean([v[1] for v in vertices])
+    
+    angles = [np.arctan2(v[1] - center_y, v[0] - center_x) for v in vertices]
+    sorted_indices = np.argsort(angles)
+    
+    return [vertices[i] for i in sorted_indices]
+
+
+def generate_pentagon_parameters(n_geoms=30, seed=42):
+    """Генерирует параметры пятиугольников"""
+    np.random.seed(seed)
+    
+    num = n_geoms
+    
+    leftpoint_x = np.random.randint(0, 21, num) / 10.0
+    leftpoint_y = np.random.randint(40, 61, num) / 10.0
+    
+    rightpoint_x = np.random.randint(80, 101, num) / 10.0
+    rightpoint_y = np.random.randint(40, 61, num) / 10.0
+
+    midpoint_x = leftpoint_x + np.random.rand(num) * (rightpoint_x - leftpoint_x)
+    midpoint_y = np.random.randint(60, 80, num) / 10.0
+    
+    down_leftpoint_x = np.random.randint(20, 41, num) / 10.0
+    down_rightpoint_x = np.random.randint(60, 81, num) / 10.0
+    
+    scaled = 0.5 + 0.5 * np.random.rand(num)
+    
+    geoms = []
+    for i in range(num):
+        mid_x = midpoint_x[i] * scaled[i]
+        mid_y = midpoint_y[i] * scaled[i]
+        
+        left_x = leftpoint_x[i] * scaled[i]
+        left_y = leftpoint_y[i] * scaled[i]
+        
+        right_x = rightpoint_x[i] * scaled[i]
+        right_y = rightpoint_y[i] * scaled[i]
+        
+        down_left_x = down_leftpoint_x[i] * scaled[i]
+        down_right_x = down_rightpoint_x[i] * scaled[i]
+        
+        y_down = 0.0
+        
+        # ИСХОДНЫЕ вершины (порядок может быть невалидный)
+        vertices = [
+            (mid_x, mid_y),
+            (down_left_x, y_down),
+            (down_right_x, y_down),
+            (right_x, right_y),
+            (left_x, left_y),
+        ]
+        
+        # РЕГУЛЯРИЗУЕМ: переупорядочиваем по углу от центроида
+        vertices = regularize_vertices(vertices)
+        
+        geom = {
+            "id": i + 1,
+            "vertices": vertices,
+        }
+        geoms.append(geom)
+    
+    return geoms
+
+
+def create_pentagon_simple(geom_params, output_path, mesh_size=0.5, max_retries=5):
+    """
+    Создаёт пятиугольник БЕЗ ДЫРКИ для простого тестирования
+    """
+    
+    vertices = geom_params["vertices"]
+    geom_id = geom_params["id"]
+    
+    if geom_id <= 3:
+        print(f"\n{'='*60}")
+        print(f"Пятиугольник {geom_id}")
+        print(f"{'='*60}")
+        print(f"Вершины (после регуляризации):")
+        for idx, (x, y) in enumerate(vertices):
+            print(f"  {idx}: ({x:.3f}, {y:.3f})")
+    
+    for attempt in range(max_retries):
+        current_mesh_size = mesh_size * (1 + 0.3 * attempt)
+        
+        gmsh.initialize()
+        gmsh.option.setNumber("General.Verbosity", 0)  # Отключаем спам
+        gmsh.model.add(f"pentagon_{geom_id}")
+        
+        # ===== СОЗДАТЬ ПЯТИУГОЛЬНИК =====
+        
+        pts = []
+        for x, y in vertices:
+            pts.append(gmsh.model.geo.addPoint(x, y, 0, current_mesh_size))
+        
+        lines = []
+        for i in range(5):
+            lines.append(gmsh.model.geo.addLine(pts[i], pts[(i+1) % 5]))
+        
+        outer_loop = gmsh.model.geo.addCurveLoop(lines)
+        
+        # ===== ПОВЕРХНОСТЬ (БЕЗ ДЫРКИ!) =====
+        
+        surface = gmsh.model.geo.addPlaneSurface([outer_loop])
+        
+        gmsh.model.geo.synchronize()
+        
+        # ===== ФИЗИЧЕСКИЕ ГРУППЫ =====
+        
+        gmsh.model.addPhysicalGroup(2, [surface], name="Domain")
+        gmsh.model.addPhysicalGroup(1, lines, name="OuterBoundary")
+        
+        # ===== СЕТКА =====
+        
+        try:
+            gmsh.model.mesh.generate(2)
+            
+            node_tags, node_coords, _ = gmsh.model.mesh.getNodes()
+            elem_types, elem_tags, node_connectivity = gmsh.model.mesh.getElements()
+            
+            n_nodes = len(node_tags)
+            n_triangles = len(node_connectivity[0]) // 3 if node_connectivity else 0
+            
+            if geom_id <= 3:
+                print(f" Сетка: {n_nodes} вершин, {n_triangles} треугольников")
+            
+            gmsh.write(output_path)
+            gmsh.finalize()
+            
+            if geom_id <= 3:
+                print(f" Сохранено: {output_path}")
+            
+            return {
+                "id": geom_id,
+                "file": output_path,
+                "n_nodes": n_nodes,
+                "n_triangles": n_triangles,
+            }
+            
+        except Exception as e:
+            gmsh.finalize()
+            if attempt == max_retries - 1:
+                if geom_id <= 3:
+                    print(f"  Не удалось после {max_retries} попыток: {e}")
+                return None
+
+
+def main():
+    """Главная функция"""
+    
+    
+    output_dir = "pentagons_fixed"
+    os.makedirs(output_dir, exist_ok=True)
+    
+    print("\n  Генерирую параметры пятиугольников...")
+    geoms = generate_pentagon_parameters(n_geoms=30, seed=42)
+    
+
+    
+    results = []
+    failed = 0
+    
+    for i, geom in enumerate(geoms):
+        output_path = os.path.join(output_dir, f"pentagon_{geom['id']}.msh")
+        result = create_pentagon_simple(geom, output_path)
+        
+        if result is None:
+            failed += 1
+        else:
+            results.append(result)
+        
+        if (i + 1) % 10 == 0:
+            print(f"   Создано {i + 1}/30")
+
+    
+    print(f"\n Успешно создано {len(results)}/30 пятиугольников!")
+    
+    if failed > 0:
+        print(f"  Не удалось создать {failed}")
+    
+    if results:
+        print(f"\n Статистика:")
+        
+        all_nodes = [r['n_nodes'] for r in results]
+        all_triangles = [r['n_triangles'] for r in results]
+        
+        print(f"  Вершин: min={min(all_nodes)}, max={max(all_nodes)}, avg={np.mean(all_nodes):.0f}")
+        print(f"  Треугольников: min={min(all_triangles)}, max={max(all_triangles)}, avg={np.mean(all_triangles):.0f}")
+    
+    print(f"\n Файлы: {output_dir}/pentagon_*.msh")
+    print(f"\n Готово!")
+
+
+if __name__ == "__main__":
+    main()
