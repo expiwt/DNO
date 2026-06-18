@@ -1,7 +1,5 @@
 # DNO - Diffeomorphic Neural Operator
 
-[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)]()
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)]()
 
 **Diffeomorphic Neural Operator** - метод для решения PDE на семействах 2D-доменов с разной геометрией и топологией. Идея: через диффеоморфное отображение привести все геометрии к универсальному домену, обучить нейрооператор в нём, и обобщать на новые формы без переобучения.
 
