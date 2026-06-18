@@ -273,7 +273,6 @@ def test_model_on_quads():
     if test_a is None:
         print("[FAIL] Could not load data. Aborting test.")
         return None, None, None, None, None, None
-    # --------------------------
 
     
     # Перемещаем на device

@@ -23,9 +23,7 @@ from Loss_function import LpLoss, count_params  # keep your import
 # from Adam import Adam  # not used (you use AdamW)
 
 
-# -----------------------
 # Utils
-# -----------------------
 def ensure_dir(path: str):
     os.makedirs(path, exist_ok=True)
 
@@ -56,9 +54,7 @@ def mem(tag=""):
     print(f"[{tag}] alloc={a:.0f}MB reserv={r:.0f}MB peak={m:.0f}MB")
 
 
-# -----------------------
 # Data IO (same logic as yours)
-# -----------------------
 def readfile(path):
     with open(path, "r") as f:
         rows = list(csv.reader(f))
@@ -127,9 +123,7 @@ def load_data(train_dataset_list, test_dataset_list, S):
     return train_a, train_u, test_a, test_u
 
 
-# -----------------------
 # Model (same as yours, but kept intact)
-# -----------------------
 class SpectralConv2d_fast(nn.Module):
     def __init__(self, in_channels, out_channels, modes1, modes2):
         super().__init__()
@@ -239,9 +233,7 @@ class FNO2d(nn.Module):
         return x
 
 
-# -----------------------
 # Training / evaluation
-# -----------------------
 def train_one_run(
     run_dir,
     device,
@@ -415,9 +407,7 @@ def train_one_run(
     return summary
 
 
-# -----------------------
 # Main sweep
-# -----------------------
 def main():
     # ====== DATASET CONFIG ======
     train_dataset_list = ["sq_data_w_hole"]

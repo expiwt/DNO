@@ -11,7 +11,6 @@ def load_coordinates_from_csv(filepath_x, filepath_y, num_samples=None):
     Загружает координаты из CSV файлов
     
     Returns:
-    --------
     x_coords, y_coords : ndarray
         Массивы координат [num_samples, 128*128]
     """
@@ -40,12 +39,10 @@ def compute_DDS(domain_coords_1, domain_coords_2):
     Вычисляет DDS между двумя доменами
     
     Parameters:
-    -----------
     domain_coords_1, domain_coords_2 : ndarray, shape [2, N]
         X и Y координаты точек сетки
     
     Returns:
-    --------
     dds : float
     """
     coords_1_flat = domain_coords_1.flatten()
@@ -59,7 +56,6 @@ def compute_cross_DDS(x_coords_A, y_coords_A, x_coords_B, y_coords_B):
     Вычисляет DDS между всеми парами образцов из двух датасетов A и B
     
     Returns:
-    --------
     cross_dds_matrix : ndarray, shape [num_A, num_B]
         Матрица DDS между датасетами
     dds_scores_A : ndarray, shape [num_A]

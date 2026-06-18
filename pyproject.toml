@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "dno"
+version = "0.1.0"
+description = "Diffeomorphic Neural Operator for PDEs on diverse geometries"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "numpy",
+    "zencfg",
+    "neuralop",
+    "h5py",
+    "matplotlib",
+    "scipy",
+]
+
+[project.urls]
+Repository = "https://github.com/expiwt/DNO"
+
+[tool.setuptools.packages.find]
+include = ["dno*"]

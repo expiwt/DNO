@@ -8,12 +8,10 @@ def read_msh_file(filename: str) -> Tuple[np.ndarray, np.ndarray, List[int], Lis
     Читает MSH 4.1 файл и возвращает триангуляцию с границами.
     
     Parameters
-    ----------
     filename : str
         Путь к MSH файлу
     
     Returns
-    -------
     X : (n_nodes, 2) ndarray
         Координаты узлов [x, y] (0-indexed)
     
@@ -290,7 +288,8 @@ def read_msh_file(filename: str) -> Tuple[np.ndarray, np.ndarray, List[int], Lis
     # print(f"  Outer lower-left point at index {min_idx}: {X[B_outer[0]]}")
     
     # ========================================================================
-    # FINAL INFO
+    # final info
+
     # ========================================================================
     info = {
         'center_hole': center_hole,

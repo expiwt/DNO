@@ -10,14 +10,12 @@ def load_coordinates_from_csv(filepath, num_samples=None):
     Загружает координаты из CSV файла
     
     Parameters:
-    -----------
     filepath : str
         Путь к файлу (x_data.csv или y_data.csv)
     num_samples : int, optional
         Количество образцов для загрузки (если None - загружаем все)
     
     Returns:
-    --------
     coords : ndarray, shape [num_samples, 128*128]
         Координаты для каждого образца
     """
@@ -37,14 +35,12 @@ def compute_DDS(domain_coords_1, domain_coords_2):
     Вычисляет DDS (Domain Diffeomorphism Similarity) между двумя доменами
     
     Parameters:
-    -----------
     domain_coords_1 : ndarray, shape [128*128, 2] или [2, 128*128]
         X и Y координаты точек сетки домена 1 в генерическом пространстве
     domain_coords_2 : ndarray, shape [128*128, 2] или [2, 128*128]
         X и Y координаты точек сетки домена 2 в генерическом пространстве
     
     Returns:
-    --------
     dds : float
         Значение DDS от -1 до 1 (обычно 0.9-1.0 для похожих доменов)
     """
@@ -63,14 +59,12 @@ def compute_DDS_matrix(x_coords, y_coords):
     Вычисляет матрицу DDS между всеми парами образцов
     
     Parameters:
-    -----------
     x_coords : ndarray, shape [num_samples, 128*128]
         X координаты для всех образцов
     y_coords : ndarray, shape [num_samples, 128*128]
         Y координаты для всех образцов
     
     Returns:
-    --------
     dds_matrix : ndarray, shape [num_samples, num_samples]
         Матрица DDS между всеми парами
     """
@@ -101,7 +95,6 @@ def compute_DDS_between_datasets(x_coords_train, y_coords_train,
     Вычисляет DDS между тренировочным (пятиугольники) и тестовым (четырехугольники) датасетами
     
     Returns:
-    --------
     dds_scores : ndarray, shape [num_test_samples]
         Средний DDS для каждого тестового образца относительно тренировочных
     """

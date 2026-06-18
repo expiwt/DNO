@@ -5,9 +5,7 @@ import matplotlib.tri as tri
 from scipy import sparse
 from scipy.sparse.linalg import spsolve
 
-###############################################################################
 # НАСТРОЙКИ ГЕНЕРАЦИИ СЕТКИ И ПАРАМЕТРОВ ДАРСИ
-###############################################################################
 
 # Основные параметры
 TOTAL_POINTS = 150
@@ -32,9 +30,7 @@ PRESSURE_FILENAME = 'U.csv'
 COORDS_X_FILENAME = 'x_data.csv'
 COORDS_Y_FILENAME = 'y_data.csv'
 
-###############################################################################
 # ФУНКЦИИ ДЛЯ ГЕНЕРАЦИИ СЕТКИ
-###############################################################################
 
 def point_in_polygon(x, y, poly):
     n = len(poly)
@@ -102,9 +98,7 @@ def create_enhanced_pentagon(num_points=TOTAL_POINTS, seed=SEED):
     all_points = np.vstack([vertices, points_list, interior_points])
     return all_points, vertices
 
-###############################################################################
 # ФУНКЦИИ ДЛЯ УРАВНЕНИЯ ДАРСИ (МЕТОД 2)
-###############################################################################
 
 def generate_random_parameters():
     """
@@ -236,9 +230,7 @@ def export_darcy_data(points, permeability, pressure):
     print(f"  Проницаемость: {PERMEABILITY_FILENAME}")
     print(f"  Давление: {PRESSURE_FILENAME}")
 
-###############################################################################
 # ОСНОВНОЙ КОД
-###############################################################################
 
 # Генерация геометрии
 print("Создание пятиугольника и триангуляции...")
